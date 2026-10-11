@@ -55,5 +55,8 @@ dotnet_naming_symbols.private_fields.applicable_accessibilities = private
 dotnet_naming_style.underscore_camel.required_prefix = _
 dotnet_naming_style.underscore_camel.capitalization = camel_case
 
+[**/Migrations/*.cs]
+generated_code = true
+
 [*.md]
 trim_trailing_whitespace = false
