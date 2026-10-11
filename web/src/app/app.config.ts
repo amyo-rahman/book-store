@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import Aura from '@primeuix/themes/aura';
 import { providePrimeNG } from 'primeng/config';
+import { BookStoreTheme } from './presentation/theme';
 import { PRIMEUI_LICENSE } from './primeui-license';
 
 export const appConfig: ApplicationConfig = {
@@ -9,7 +9,7 @@ export const appConfig: ApplicationConfig = {
     providePrimeNG({
       license: PRIMEUI_LICENSE,
       theme: {
-        preset: Aura,
+        preset: BookStoreTheme,
         options: {
           darkModeSelector: '.app-dark',
           cssLayer: { name: 'primeng', order: 'theme, base, primeng' },
