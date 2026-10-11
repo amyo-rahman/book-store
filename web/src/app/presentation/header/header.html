@@ -17,11 +17,20 @@
       <label for="genre-filter" class="text-sm text-slate-600">Genre</label>
       <p-select
         inputId="genre-filter"
-        [options]="genres"
-        placeholder="All genres"
+        [options]="options()"
+        optionLabel="genre"
+        optionValue="genre"
+        [placeholder]="placeholder()"
         [showClear]="true"
-        class="w-48"
-      />
+        class="w-52"
+      >
+        <ng-template #item let-option>
+          <div class="flex w-full items-center justify-between gap-3">
+            <span>{{ option.genre }}</span>
+            <span class="rounded-full bg-slate-100 px-2 text-xs text-slate-600">{{ option.count }}</span>
+          </div>
+        </ng-template>
+      </p-select>
       <span class="hidden h-6 w-px bg-slate-200 sm:block" aria-hidden="true"></span>
       <p-button label="Add book" icon="pi pi-plus" />
     </div>

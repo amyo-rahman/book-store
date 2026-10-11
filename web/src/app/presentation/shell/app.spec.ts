@@ -1,10 +1,13 @@
 import { TestBed } from '@angular/core/testing';
+import { FakeBookRepository } from '../../../testing/fake-book.repository';
+import { BookRepository } from '../../core/ports/book.repository';
 import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [{ provide: BookRepository, useValue: new FakeBookRepository() }],
     }).compileComponents();
   });
 

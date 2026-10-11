@@ -2,12 +2,77 @@
   <section class="rounded-xl border border-slate-200 bg-white" aria-labelledby="books-heading">
     <div class="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
       <h2 id="books-heading" class="font-semibold">Books</h2>
-      <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">0 titles</span>
+      <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+        {{ books().length }} titles
+      </span>
     </div>
 
-    <div class="flex flex-col items-center gap-2 px-4 py-16 text-center text-slate-500">
-      <i class="pi pi-book text-3xl text-slate-300" aria-hidden="true"></i>
-      <p>No books yet</p>
-    </div>
+    @if (error()) {
+      <div class="flex flex-col items-center gap-3 px-4 py-16 text-center text-slate-500" role="alert">
+        <i class="pi pi-exclamation-triangle text-3xl text-red-400" aria-hidden="true"></i>
+        <p>Couldn't load books.</p>
+        <p-button label="Try again" icon="pi pi-refresh" severity="secondary" (onClick)="reload()" />
+      </div>
+    } @else {
+      <p-table [value]="books()" [loading]="isLoading()" dataKey="id" styleClass="text-sm">
+        <ng-template #header>
+          <tr>
+            <th class="w-12"><span class="sr-only">Cover</span></th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Genre</th>
+            <th class="text-right">Year</th>
+            <th class="text-right">Price</th>
+            <th class="text-right">Stock</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-book>
+          <tr>
+            <td>
+              @if (book.coverUrl) {
+                <img
+                  [src]="book.coverUrl"
+                  alt=""
+                  width="28"
+                  height="40"
+                  loading="lazy"
+                  class="h-10 w-7 rounded object-cover"
+                />
+              } @else {
+                <div class="h-10 w-7 rounded bg-slate-200"></div>
+              }
+            </td>
+            <td>
+              <div class="font-medium">{{ book.title }}</div>
+              @if (book.isbn) {
+                <div class="font-mono text-xs text-slate-500">ISBN {{ book.isbn }}</div>
+              }
+            </td>
+            <td>{{ book.author }}</td>
+            <td>
+              <span class="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700">
+                {{ book.genre }}
+              </span>
+            </td>
+            <td class="text-right">{{ book.publishedYear }}</td>
+            <td class="text-right">{{ book.price | currency: 'USD' }}</td>
+            <td class="text-right">
+              @if (book.stock === 0) {
+                <span class="font-medium text-red-600">Out of stock</span>
+              } @else if (book.stock <= 3) {
+                <span class="font-medium text-amber-600">{{ book.stock }} · low</span>
+              } @else {
+                {{ book.stock }}
+              }
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="7" class="py-16 text-center text-slate-500">No books yet</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
   </section>
 </main>
