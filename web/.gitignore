@@ -39,6 +39,9 @@ testem.log
 /typings
 __screenshots__/
 
+# Local secrets
+src/app/primeui-license.local.ts
+
 # System files
 .DS_Store
 Thumbs.db

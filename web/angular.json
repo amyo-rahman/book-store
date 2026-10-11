@@ -48,6 +48,14 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "local": {
+              "fileReplacements": [
+                {
+                  "replace": "src/app/primeui-license.ts",
+                  "with": "src/app/primeui-license.local.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -60,6 +68,9 @@
             },
             "development": {
               "buildTarget": "book-store-web:build:development"
+            },
+            "local": {
+              "buildTarget": "book-store-web:build:development,local"
             }
           },
           "defaultConfiguration": "development"
