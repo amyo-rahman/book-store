@@ -11,19 +11,6 @@ internal sealed class GetBooksHandler(IAppDbContext db) : IRequestHandler<GetBoo
         await db.Books
             .AsNoTracking()
             .OrderBy(b => b.Title)
-            .Select(b => new BookDto(
-                b.Id,
-                b.Title,
-                b.Author,
-                b.Isbn,
-                b.PublishedYear,
-                b.CoverUrl,
-                b.OpenLibraryKey,
-                b.Description,
-                b.Genre,
-                b.Price,
-                b.Stock,
-                b.CreatedAt,
-                b.UpdatedAt))
+            .Select(b => BookDto.FromEntity(b))
             .ToListAsync(cancellationToken);
 }

@@ -15,4 +15,21 @@ public sealed record BookDto(
     decimal Price,
     int Stock,
     DateTimeOffset CreatedAt,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt)
+{
+    public static BookDto FromEntity(Book book) =>
+        new(
+            book.Id,
+            book.Title,
+            book.Author,
+            book.Isbn,
+            book.PublishedYear,
+            book.CoverUrl,
+            book.OpenLibraryKey,
+            book.Description,
+            book.Genre,
+            book.Price,
+            book.Stock,
+            book.CreatedAt,
+            book.UpdatedAt);
+}
