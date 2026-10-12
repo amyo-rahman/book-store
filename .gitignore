@@ -21,3 +21,6 @@ obj/
 .idea/
 Thumbs.db
 .DS_Store
+
+# Test output
+TestResults/
