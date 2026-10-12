@@ -1,4 +1,5 @@
 using BookStore.Application.Abstractions;
+using BookStore.Infrastructure.OpenLibrary;
 using BookStore.Infrastructure.Persistence;
 using BookStore.Infrastructure.Persistence.Seed;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,13 @@ public static class DependencyInjection
         services.AddSingleton(TimeProvider.System);
         services.AddDbContext<BookStoreDbContext>(options => options.UseSqlite(connectionString));
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<BookStoreDbContext>());
+
+        services.AddHttpClient<IBookCatalog, OpenLibraryClient>(client =>
+        {
+            client.BaseAddress = new Uri(OpenLibraryClient.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(10);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("BookStore/1.0 (assessment project)");
+        });
 
         return services;
     }
