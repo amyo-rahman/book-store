@@ -1,0 +1,177 @@
+<p-dialog
+  header="Add a book from Open Library"
+  [(visible)]="visible"
+  [modal]="true"
+  [draggable]="false"
+  [dismissableMask]="true"
+  [style]="{ width: '44rem' }"
+  [breakpoints]="{ '640px': '95vw' }"
+  (onHide)="reset()"
+>
+  @if (selected(); as book) {
+    <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col gap-5" novalidate>
+      <section
+        class="flex gap-4 rounded-lg border border-slate-200 bg-slate-50 p-3"
+        aria-label="Selected book"
+      >
+        @if (book.coverUrl) {
+          <img [src]="book.coverUrl" alt="" width="56" height="84" class="h-21 w-14 rounded object-cover" />
+        }
+        <div class="min-w-0 flex-1">
+          <h3 class="font-semibold">{{ book.title }}</h3>
+          <p class="text-sm text-slate-600">{{ book.author }}</p>
+          <p class="text-sm text-slate-500">
+            {{ book.publishedYear }}
+            @if (book.isbn) {
+              · <span class="font-mono">ISBN {{ book.isbn }}</span>
+            }
+          </p>
+        </div>
+        <p-button label="Change book" [link]="true" size="small" (onClick)="changeBook()" />
+      </section>
+
+      <div class="grid gap-4 sm:grid-cols-3">
+        <div class="flex flex-col gap-1">
+          <label for="genre" class="text-sm text-slate-700">Genre</label>
+          <p-select
+            inputId="genre"
+            formControlName="genre"
+            [options]="genres"
+            placeholder="Choose a genre"
+            appendTo="body"
+            class="w-full"
+          />
+          @if (hasError('genre', 'required')) {
+            <small class="text-red-600">Genre is required.</small>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="price" class="text-sm text-slate-700">Price</label>
+          <p-inputnumber
+            inputId="price"
+            formControlName="price"
+            mode="currency"
+            currency="USD"
+            locale="en-US"
+            class="w-full"
+            inputStyleClass="w-full"
+          />
+          @if (hasError('price', 'required')) {
+            <small class="text-red-600">Price is required.</small>
+          } @else if (hasError('price', 'min')) {
+            <small class="text-red-600">Price must be greater than 0.</small>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="stock" class="text-sm text-slate-700">Stock</label>
+          <p-inputnumber
+            inputId="stock"
+            formControlName="stock"
+            [min]="0"
+            [useGrouping]="false"
+            class="w-full"
+            inputStyleClass="w-full"
+          />
+          @if (hasError('stock', 'required')) {
+            <small class="text-red-600">Stock is required.</small>
+          }
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label for="description" class="text-sm text-slate-700">
+          Description <span class="text-slate-400">(optional)</span>
+        </label>
+        <textarea pTextarea id="description" formControlName="description" rows="3" maxlength="4000"></textarea>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <p-button label="Cancel" severity="secondary" [text]="true" (onClick)="visible.set(false)" />
+        <p-button label="Save" icon="pi pi-check" type="submit" [disabled]="!canSave()" />
+      </div>
+    </form>
+  } @else {
+    <div class="flex flex-col gap-4">
+      <div class="flex gap-2">
+        <p-iconfield class="flex-1">
+          <p-inputicon class="pi pi-search" />
+          <input
+            pInputText
+            type="search"
+            class="w-full"
+            placeholder="Title, author or ISBN"
+            aria-label="Search Open Library"
+            [value]="query()"
+            (input)="onQueryInput($event)"
+            (keydown.enter)="search()"
+          />
+        </p-iconfield>
+        <p-button label="Search" [disabled]="!query().trim()" (onClick)="search()" />
+      </div>
+
+      <div class="min-h-72" aria-live="polite">
+        @if (results.isLoading()) {
+          <p class="flex items-center gap-2 py-10 text-slate-500">
+            <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> Searching…
+          </p>
+        } @else if (results.error()) {
+          <p class="py-10 text-red-600" role="alert">Search failed. Please try again.</p>
+        } @else if (!results.hasValue()) {
+          <p class="py-10 text-slate-500">Search for a book to add.</p>
+        } @else if (results.value().length === 0) {
+          <p class="py-10 text-slate-500">No matches.</p>
+        } @else {
+          <ul class="flex max-h-80 flex-col gap-2 overflow-y-auto">
+            @for (item of results.value(); track item.openLibraryKey) {
+              @let inStore = isInStore(item);
+              <li>
+                <button
+                  type="button"
+                  class="flex w-full items-center gap-3 rounded-lg border border-slate-200 p-2 text-left enabled:hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  [disabled]="inStore"
+                  (click)="select(item)"
+                >
+                  @if (item.coverUrl) {
+                    <img
+                      [src]="item.coverUrl"
+                      alt=""
+                      width="32"
+                      height="48"
+                      loading="lazy"
+                      class="h-12 w-8 shrink-0 rounded object-cover"
+                    />
+                  } @else {
+                    <div class="h-12 w-8 shrink-0 rounded bg-slate-200"></div>
+                  }
+                  <div class="min-w-0 flex-1">
+                    <div class="truncate font-medium">{{ item.title }}</div>
+                    <div class="truncate text-sm text-slate-600">
+                      {{ item.author }}
+                      @if (item.publishedYear) {
+                        · {{ item.publishedYear }}
+                      }
+                    </div>
+                    @if (item.isbn) {
+                      <div class="font-mono text-xs text-slate-500">ISBN {{ item.isbn }}</div>
+                    }
+                  </div>
+                  @if (inStore) {
+                    <span class="shrink-0 rounded-full bg-slate-200 px-2 py-0.5 text-xs text-slate-700">
+                      Already in store
+                    </span>
+                  }
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="flex justify-end">
+        <p-button label="Cancel" severity="secondary" [text]="true" (onClick)="visible.set(false)" />
+      </div>
+    </div>
+  }
+</p-dialog>

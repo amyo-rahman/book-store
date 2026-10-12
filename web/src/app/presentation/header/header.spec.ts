@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MessageService } from 'primeng/api';
 import { FakeBookRepository } from '../../../testing/fake-book.repository';
+import { FakeCatalogRepository } from '../../../testing/fake-catalog.repository';
 import { BookRepository } from '../../core/ports/book.repository';
+import { CatalogRepository } from '../../core/ports/catalog.repository';
 import { Header } from './header';
 
 describe('Header', () => {
@@ -17,7 +20,11 @@ describe('Header', () => {
 
     await TestBed.configureTestingModule({
       imports: [Header],
-      providers: [{ provide: BookRepository, useValue: repository }],
+      providers: [
+        MessageService,
+        { provide: BookRepository, useValue: repository },
+        { provide: CatalogRepository, useValue: new FakeCatalogRepository() },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Header);
