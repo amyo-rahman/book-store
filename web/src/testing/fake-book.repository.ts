@@ -1,5 +1,6 @@
 import { Observable, of } from 'rxjs';
 import { Book } from '../app/core/models/book';
+import { Genre } from '../app/core/models/genre';
 import { GenreCount } from '../app/core/models/genre-count';
 import { NewBook } from '../app/core/models/new-book';
 import { BookRepository } from '../app/core/ports/book.repository';
@@ -12,8 +13,8 @@ export class FakeBookRepository extends BookRepository {
     super();
   }
 
-  list(): Observable<Book[]> {
-    return of(this.books);
+  list(genre: Genre | null = null): Observable<Book[]> {
+    return of(genre ? this.books.filter((b) => b.genre === genre) : this.books);
   }
 
   genreCounts(): Observable<GenreCount[]> {

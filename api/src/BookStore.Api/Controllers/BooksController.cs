@@ -2,6 +2,7 @@ using BookStore.Application.Common;
 using BookStore.Application.Features.Books.AddBook;
 using BookStore.Application.Features.Books.GetBooks;
 using BookStore.Application.Features.Books.GetGenreCounts;
+using BookStore.Domain;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,8 +13,10 @@ namespace BookStore.Api.Controllers;
 public sealed class BooksController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<BookDto>>> GetBooks(CancellationToken cancellationToken) =>
-        Ok(await sender.Send(new GetBooksQuery(), cancellationToken));
+    public async Task<ActionResult<IReadOnlyList<BookDto>>> GetBooks(
+        [FromQuery] Genre? genre,
+        CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetBooksQuery(genre), cancellationToken));
 
     [HttpGet("genres")]
     public async Task<ActionResult<IReadOnlyList<GenreCount>>> GetGenreCounts(CancellationToken cancellationToken) =>

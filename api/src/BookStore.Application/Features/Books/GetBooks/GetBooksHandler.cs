@@ -7,10 +7,18 @@ namespace BookStore.Application.Features.Books.GetBooks;
 
 internal sealed class GetBooksHandler(IAppDbContext db) : IRequestHandler<GetBooksQuery, IReadOnlyList<BookDto>>
 {
-    public async Task<IReadOnlyList<BookDto>> Handle(GetBooksQuery request, CancellationToken cancellationToken) =>
-        await db.Books
-            .AsNoTracking()
+    public async Task<IReadOnlyList<BookDto>> Handle(GetBooksQuery request, CancellationToken cancellationToken)
+    {
+        var books = db.Books.AsNoTracking();
+
+        if (request.Genre is { } genre)
+        {
+            books = books.Where(b => b.Genre == genre);
+        }
+
+        return await books
             .OrderBy(b => b.Title)
             .Select(b => BookDto.FromEntity(b))
             .ToListAsync(cancellationToken);
+    }
 }

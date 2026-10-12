@@ -42,12 +42,20 @@ describe('HttpBookRepository', () => {
       updatedAt: '2026-10-01T09:00:00+00:00',
     };
 
-    const result = firstValueFrom(repository.list());
+    const result = firstValueFrom(repository.list(null));
     http.expectOne({ method: 'GET', url: '/api/books' }).flush([dto]);
     const [book] = await result;
 
     expect(book.title).toBe('Dune');
     expect(book.createdAt).toEqual(new Date('2026-10-01T09:00:00Z'));
+  });
+
+  it('should pass the genre filter as a query parameter', () => {
+    repository.list('SciFi').subscribe();
+
+    const request = http.expectOne((r) => r.url === '/api/books');
+    expect(request.request.params.get('genre')).toBe('SciFi');
+    request.flush([]);
   });
 
   it('should get genre counts', async () => {

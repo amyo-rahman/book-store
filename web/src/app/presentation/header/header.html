@@ -22,6 +22,8 @@
         optionValue="genre"
         [placeholder]="placeholder()"
         [showClear]="true"
+        [ngModel]="filter.genre()"
+        (ngModelChange)="filter.setGenre($event ?? null)"
         class="w-52"
       >
         <ng-template #item let-option>
