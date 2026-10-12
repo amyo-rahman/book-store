@@ -2,10 +2,11 @@ using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using BookStore.Application.Abstractions;
 using BookStore.Application.Common;
+using Microsoft.Extensions.Logging;
 
 namespace BookStore.Infrastructure.OpenLibrary;
 
-internal sealed class OpenLibraryClient(HttpClient http) : IBookCatalog
+internal sealed class OpenLibraryClient(HttpClient http, ILogger<OpenLibraryClient> logger) : IBookCatalog
 {
     public const string BaseUrl = "https://openlibrary.org/";
     private const int ResultLimit = 20;
@@ -16,10 +17,14 @@ internal sealed class OpenLibraryClient(HttpClient http) : IBookCatalog
         var url = $"search.json?q={Uri.EscapeDataString(query)}&limit={ResultLimit}&fields={Fields}";
         var response = await http.GetFromJsonAsync<SearchResponse>(url, cancellationToken);
 
-        return response?.Docs
+        var items = response?.Docs
             .Where(d => !string.IsNullOrWhiteSpace(d.Key) && !string.IsNullOrWhiteSpace(d.Title))
             .Select(ToCatalogItem)
             .ToList() ?? [];
+
+        logger.LogInformation("Open Library search for {Query} returned {ResultCount} results", query, items.Count);
+
+        return items;
     }
 
     private static CatalogItemDto ToCatalogItem(SearchDoc doc) =>

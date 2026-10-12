@@ -3,10 +3,12 @@ using BookStore.Application.Common;
 using BookStore.Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace BookStore.Application.Features.Books.AddBook;
 
-internal sealed class AddBookHandler(IAppDbContext db) : IRequestHandler<AddBookCommand, BookDto>
+internal sealed class AddBookHandler(IAppDbContext db, ILogger<AddBookHandler> logger)
+    : IRequestHandler<AddBookCommand, BookDto>
 {
     public async Task<BookDto> Handle(AddBookCommand request, CancellationToken cancellationToken)
     {
@@ -19,6 +21,7 @@ internal sealed class AddBookHandler(IAppDbContext db) : IRequestHandler<AddBook
 
         if (isDuplicate)
         {
+            logger.LogWarning("Rejected duplicate book {OpenLibraryKey} (ISBN {Isbn})", openLibraryKey, isbn);
             throw new DuplicateBookException();
         }
 
@@ -36,6 +39,8 @@ internal sealed class AddBookHandler(IAppDbContext db) : IRequestHandler<AddBook
 
         db.Books.Add(book);
         await db.SaveChangesAsync(cancellationToken);
+
+        logger.LogInformation("Added book {BookId} {Title} in {Genre}", book.Id, book.Title, book.Genre);
 
         return BookDto.FromEntity(book);
     }
