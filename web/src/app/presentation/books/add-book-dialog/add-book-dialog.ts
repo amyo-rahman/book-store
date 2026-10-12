@@ -8,10 +8,12 @@ import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { InputNumber } from 'primeng/inputnumber';
 import { InputText } from 'primeng/inputtext';
+import { Message } from 'primeng/message';
 import { Select } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
 import { BooksStore } from '../../../application/state/books.store';
 import { CatalogItem } from '../../../core/models/catalog-item';
+import { DuplicateBookError } from '../../../core/models/errors';
 import { Genre, GENRES } from '../../../core/models/genre';
 import { CatalogRepository } from '../../../core/ports/catalog.repository';
 
@@ -23,6 +25,7 @@ import { CatalogRepository } from '../../../core/ports/catalog.repository';
     InputIcon,
     InputNumber,
     InputText,
+    Message,
     ReactiveFormsModule,
     Select,
     Textarea,
@@ -39,6 +42,8 @@ export class AddBookDialog {
 
   protected readonly query = signal('');
   protected readonly selected = signal<CatalogItem | null>(null);
+  protected readonly isSaving = signal(false);
+  protected readonly saveError = signal<string | null>(null);
   private readonly submittedQuery = signal('');
 
   protected readonly results = rxResource({
@@ -91,24 +96,43 @@ export class AddBookDialog {
   }
 
   protected save(): void {
-    const book = this.selected();
-    if (!book || this.form.invalid) {
+    const item = this.selected();
+    const { genre, price, stock, description } = this.form.getRawValue();
+    if (!item || this.form.invalid || genre === null || price === null || stock === null) {
       this.form.markAllAsTouched();
       return;
     }
 
-    this.messages.add({
-      severity: 'success',
-      summary: 'Ready to add',
-      detail: `"${book.title}" ready to add. Saving comes with the API.`,
-    });
-    this.visible.set(false);
+    this.isSaving.set(true);
+    this.saveError.set(null);
+
+    this.books
+      .add({ item, genre, price, stock, description: description.trim() || null })
+      .subscribe({
+        next: (book) => {
+          this.isSaving.set(false);
+          this.messages.add({
+            severity: 'success',
+            summary: 'Book added',
+            detail: `"${book.title}" was added to the store.`,
+          });
+          this.visible.set(false);
+        },
+        error: (error: unknown) => {
+          this.isSaving.set(false);
+          this.saveError.set(
+            error instanceof DuplicateBookError ? error.message : "Couldn't save the book. Please try again.",
+          );
+        },
+      });
   }
 
   protected reset(): void {
     this.query.set('');
     this.submittedQuery.set('');
     this.selected.set(null);
+    this.isSaving.set(false);
+    this.saveError.set(null);
     this.form.reset({ genre: null, price: null, stock: 0, description: '' });
   }
 }

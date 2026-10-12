@@ -1,6 +1,7 @@
 import { Observable, of } from 'rxjs';
 import { Book } from '../app/core/models/book';
 import { GenreCount } from '../app/core/models/genre-count';
+import { NewBook } from '../app/core/models/new-book';
 import { BookRepository } from '../app/core/ports/book.repository';
 
 export class FakeBookRepository extends BookRepository {
@@ -17,6 +18,19 @@ export class FakeBookRepository extends BookRepository {
 
   genreCounts(): Observable<GenreCount[]> {
     return of(this.counts);
+  }
+
+  add(book: NewBook): Observable<Book> {
+    return of(
+      aBook({
+        id: 'new',
+        ...book.item,
+        genre: book.genre,
+        price: book.price,
+        stock: book.stock,
+        description: book.description,
+      }),
+    );
   }
 }
 

@@ -87,9 +87,19 @@
         <textarea pTextarea id="description" formControlName="description" rows="3" maxlength="4000"></textarea>
       </div>
 
+      @if (saveError(); as message) {
+        <p-message severity="error" role="alert">{{ message }}</p-message>
+      }
+
       <div class="flex justify-end gap-2">
         <p-button label="Cancel" severity="secondary" [text]="true" (onClick)="visible.set(false)" />
-        <p-button label="Save" icon="pi pi-check" type="submit" [disabled]="!canSave()" />
+        <p-button
+          label="Save"
+          icon="pi pi-check"
+          type="submit"
+          [loading]="isSaving()"
+          [disabled]="!canSave() || isSaving()"
+        />
       </div>
     </form>
   } @else {
